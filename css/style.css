@@ -23,11 +23,12 @@
     font-size: 1em;
 }
 
-.countries {
+.regions {
     fill: #FFF;
     stroke: #CCC;
     stroke-width: 2px;
 }
+
 .gratLines {
     fill: none;
     stroke: #999;
