@@ -38,7 +38,8 @@ function setMap(){
 
     //use Promise.all to parallelize asynchronous data loading
     var promises = [];
-    promises.push(d3.csv("data/COL_adm1_AptitudPalma.csv")); //load attributes from csv
+    //bar chart format is not working with my data so I am putting in dummy data need to adjust data to percentage of dept area
+    promises.push(d3.csv("data/COL_adm1_AptitudPalma_dummy.csv")); //load attributes from csv
     //TO DO: change to 50m map, for better match
     promises.push(d3.json("data/ne_50m_land.json")); //load background spatial data
     promises.push(d3.json("data/COL_adm1_geojson.json")); //load choropleth spatial data
@@ -81,7 +82,14 @@ function setMap(){
 function setChart(csvData, colorScale){
     //chart frame dimensions
     var chartWidth = window.innerWidth * 0.425,
-        chartHeight = 750;
+        chartHeight = 750,
+        leftPadding = 25,
+        rightPadding = 2,
+        topBottomPadding = 5,
+        chartInnerWidth = chartWidth - leftPadding - rightPadding,
+        chartInnerHeight = chartHeight - topBottomPadding * 2,
+        translate = "translate(" + leftPadding + "," + topBottomPadding + ")";
+
 
     //create a second svg element to hold the bar chart
     var chart = d3.select("body")
@@ -90,16 +98,73 @@ function setChart(csvData, colorScale){
         .attr("height", chartHeight)
         .attr("class", "chart");
 
+     //create a rectangle for chart background fill
+    var chartBackground = chart.append("rect")
+        .attr("class", "chartBackground")
+        .attr("width", chartInnerWidth)
+        .attr("height", chartInnerHeight)
+        .attr("transform", translate);
+
     //create a scale to size bars proportionally to frame
     var yScale = d3.scaleLinear()
         .range([0, chartHeight])
         .domain([0, 105]);
 
+    //annotate bars with attribute value text
+    var numbers = chart.selectAll(".numbers")
+        .data(csvData)
+        .enter()
+        .append("text")
+        .sort(function(a, b){
+            return a[expressed]-b[expressed]
+        })
+        .attr("class", function(d){
+            return "numbers " + d.adm1_code;
+        })
+        .attr("text-anchor", "middle")
+        .attr("x", function(d, i){
+            var fraction = chartWidth / csvData.length;
+            return i * fraction + (fraction - 1) / 2;
+        })
+        .attr("y", function(d){
+            return chartHeight - yScale(parseFloat(d[expressed])) + 15;
+        })
+        .text(function(d){
+            return d[expressed];
+        });
+
+           //create a text element for the chart title
+    var chartTitle = chart.append("text")
+        .attr("x", 40)
+        .attr("y", 40)
+        .attr("class", "chartTitle")
+        .text("Number of Variable " + expressed[3] + " in each region");
+
+    //create vertical axis generator
+    var yAxis = d3.axisLeft()
+        .scale(yScale);
+
+     //place axis
+    var axis = chart.append("g")
+        .attr("class", "axis")
+        .attr("transform", translate)
+        .call(yAxis);
+
+    //create frame for chart border
+    var chartFrame = chart.append("rect")
+        .attr("class", "chartFrame")
+        .attr("width", chartInnerWidth)
+        .attr("height", chartInnerHeight)
+        .attr("transform", translate);
+
   //set bars for each province
-var bars = chart.selectAll(".bars")
+    var bars = chart.selectAll(".bars")
         .data(csvData)
         .enter()
         .append("rect")
+        .sort(function(a, b){
+            return a[expressed]-b[expressed]
+        })
         .attr("class", function(d){
             return "bars " + d.adm1_code;
         })
@@ -107,9 +172,18 @@ var bars = chart.selectAll(".bars")
         .attr("x", function(d, i){
             return i * (chartWidth / csvData.length);
         })
-        .attr("height", 750)
-        .attr("y", 0);
+        .attr("height", function(d){
+            return yScale(parseFloat(d[expressed]));
+        })
+        .attr("y", function(d){
+            return chartHeight - yScale(parseFloat(d[expressed]));
+        })
+         //apply color scale to bars
+        .style("fill", function(d){
+            return choropleth(d, colorScale);
+        });
 };
+
 
 
 //Graticules

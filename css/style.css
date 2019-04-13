@@ -2,7 +2,7 @@
 .axis path,
 .axis line {
     fill: none;
-    stroke: black;
+    stroke: #999;
     stroke-width: 1px;
     shape-rendering: crispEdges;
 }
@@ -10,6 +10,7 @@
 .axis text {
     font-family: sans-serif;
     font-size: .9em;
+    fill: #999;
 }
 
 .title {
@@ -44,9 +45,30 @@
     margin: 10px 0 0 20px;
 }
 
-.chart {
-    background-color: rgba(128,128,128,.2);
-    border: medium solid #999;
-    float: right;
-    margin: 10px 20px 0 0;
+.numbers {
+    fill: white;
+    font-family: sans-serif;
 }
+
+.chartBackground {
+    fill: rgba(128,128,128,.2);
+}
+
+.chart {
+    float: right;
+    margin: 7px 20px 0 0;
+}
+
+.chartFrame {
+    fill: none;
+    stroke: #999;
+    stroke-width: 3px;
+    shape-rendering: crispEdges;
+}
+
+.chartTitle {
+    font-family: sans-serif;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
