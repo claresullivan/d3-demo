@@ -96,7 +96,7 @@ function setChart(csvData, colorScale){
         .domain([0, 105]);
 
   //set bars for each province
-     var bars = chart.selectAll(".bars")
+var bars = chart.selectAll(".bars")
         .data(csvData)
         .enter()
         .append("rect")
@@ -107,12 +107,9 @@ function setChart(csvData, colorScale){
         .attr("x", function(d, i){
             return i * (chartWidth / csvData.length);
         })
-        .attr("height", function(d){
-            return yScale(parseFloat(d[expressed]));
-        })
-        .attr("y", function(d){
-            return chartHeight - yScale(parseFloat(d[expressed]));
-});
+        .attr("height", 750)
+        .attr("y", 0);
+};
 
 
 //Graticules
