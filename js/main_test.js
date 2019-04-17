@@ -1,14 +1,12 @@
 //Clare Sullivan
 //D3 Lab 2
 //Bugs to fix
-//2. Can I change the chart type?
-//3. bar chart is not interctive
-//4. title on bar chart is not interactive
-//5. Other design items? 
+//1. bar chart is not interctive
+//2. title on bar chart says a letter not a variable name
+//3. Other design items? 
     //5.a.Add images
-//6. Make cattle into percent land area
-//7. Bar headings are upside down
-//8. Transitions
+//5. Transitions
+//6. x labels are slightly too long....
 
 
 
@@ -17,15 +15,15 @@
 (function(){
 
 //pseudo-global variables
-var attrArray = ["Moderately Suitable for Oil Palm", "Highly Suitable for Oil Palm", "in Protected Areas", "Cattle Population","Former FARC Territory", "Former ELN Territory"]; //list of attributes
+var attrArray = ["Moderately Suitable for Oil Palm", "Highly Suitable for Oil Palm", "in Pasture", "in Forest", "in Protected Areas", "Former FARC Territory", "Former ELN Territory"]; //list of attributes
 var expressed = attrArray[0]; //initial attribute
 
 //chart frame dimensions
-var chartWidth = window.innerWidth * 0.5,
+var chartWidth = window.innerWidth * 0.4,
     chartHeight = 750,
     leftPadding = 25,
     rightPadding = 2,
-    //could change this to move charts lower on the page
+    //could change this to move charts lower on the page?
     topBottomPadding = 5,
     chartInnerWidth = chartWidth - leftPadding - rightPadding,
     chartInnerHeight = chartHeight - topBottomPadding * 2,
@@ -111,7 +109,6 @@ function setMap(){
 //Create bar chart container
 //function to create coordinated bar chart
 function setChart(csvData, colorScale){
-  
 
     //create a second svg element to hold the bar chart
     var chart = d3.select("body")
@@ -133,13 +130,12 @@ function setChart(csvData, colorScale){
         .enter()
         .append("text")
         .sort(function(a, b){
-            return a[expressed]-b[expressed]
+            return b[expressed]-a[expressed]
         })
         .attr("class", function(d){
             return "numbers " + d.ID_1;
         })
         .attr("text-anchor", "middle")
-        .attr("stroke","black")
         .attr("x", function(d, i){
             var fraction = chartWidth / csvData.length;
             return i * fraction + (fraction - 1) / 2;
@@ -149,7 +145,7 @@ function setChart(csvData, colorScale){
 //         .range([chartHeight],0)
 //         .domain([0, 105]);
          //console.log(chartHeight);
-            return chartHeight - yScale(parseFloat(d[expressed])) +15;
+            return chartHeight - yScale(100-parseFloat(d[expressed]))+ 15;
         //return (chartHeight -  parseFloat(d[expressed]) )-40;
         })
         .text(function(d){
@@ -160,11 +156,10 @@ function setChart(csvData, colorScale){
     var chartTitle = chart.append("text")
         .attr("x", 40)
         .attr("y", 40)
-        .attr("class", "chartTitle")
+        .attr("class", "chartTitle");
         //.text("Number of Variable " + expressed[3] + " in each region");
 
     //create vertical axis generator
-
     var yAxis = d3.axisLeft()
         .scale(yScale);
 
@@ -187,12 +182,22 @@ function setChart(csvData, colorScale){
         .enter()
         .append("rect")
         .sort(function(a, b){
-           return a[expressed]-b[expressed]
+          return b[expressed]-a[expressed]
         })
         .attr("class", function(d){
-           return "bars " + d.adm1_code;
+           return "bars " + d.ID_1;
         })
-        .attr("width", chartInnerWidth / csvData.length - 1);
+        .attr("width", chartWidth / csvData.length - 1);
+        //.attr("x", function(d,i){
+        //    return i * (chartWidth/csvData.length);
+        //})
+        // .attr("y", function(d){
+        //    return chartHeight -yScale(parseFloat(d[expressed]));
+        //})
+        //.style("fill", function(d){
+        //    return choropleth(d, colorScale);
+        //.attr("height", 750)
+        //.attr("y", 0);
 
         //set bar positions, heights, and colors
         updateChart(bars, csvData.length, colorScale);
@@ -246,18 +251,26 @@ function changeAttribute(attribute, csvData){
             return choropleth(d.properties, colorScale)
         });
 
-        //re-sort, resize, and recolor bars
-        //
+    //re-sort, resize, and recolor bars
     var bars = d3.selectAll(".bar")
         //re-sort bars
         .sort(function(a, b){
             return b[expressed] - a[expressed];
-        })
-        .transition() //add animation
-        .delay(function(d, i){
-            return i * 20
-        })
-        .duration(500);
+        });
+        //.attr("x", function(d, i){
+        //    return i * (chartInnerWidth / csvData.length) + leftPadding;
+        //})
+        //resize bars
+        //.attr("height", function(d, i){
+        //    return 750 - yScale(parseFloat(d[expressed]));
+        //})
+        //.attr("y", function(d, i){
+        //    return yScale(parseFloat(d[expressed])) + topBottomPadding;
+        //})
+        //recolor bars
+        //.style("fill", function(d){
+        //    return choropleth(d, colorScale);
+        //});
 
         //is this in the correct spot?
         updateChart(bars, csvData.length, colorScale);
@@ -414,12 +427,12 @@ function setLabel(props){
     var infolabel = d3.select("body")
         .append("div")
         .attr("class", "infolabel")
-        .attr("id", props.ID_1 + "_label")
+        .attr("id", props.Name + "_label")
         .html(labelAttribute);
 
     var regionName = infolabel.append("div")
         .attr("class", "labelname")
-        .html(props.name);
+        .html(props.Name);
 };
 
 //function to reset the element style on mouseout
