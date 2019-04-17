@@ -1,17 +1,47 @@
 //Clare Sullivan
-//D3 Lab Module 9
+//D3 Lab 2
+//Bugs to fix
+//2. Can I change the chart type?
+//3. bar chart is not interctive
+//4. title on bar chart is not interactive
+//5. Other design items? 
+    //5.a.Add images
+//6. Make cattle into percent land area
+//7. Bar headings are upside down
+//8. Transitions
+
+
+
 
 //First line of main.js...wrap everything in a self-executing anonymous function to move to local scope
 (function(){
 
 //pseudo-global variables
-var attrArray = ["NO_APTA", "APTITUD_BAJO", "APTITUD_MEDIA", "APTITUD_ALTA", "EXCLUSION_LEGAL"]; //list of attributes
+var attrArray = ["Moderately Suitable for Oil Palm", "Highly Suitable for Oil Palm", "in Protected Areas", "Cattle Population","Former FARC Territory", "Former ELN Territory"]; //list of attributes
 var expressed = attrArray[0]; //initial attribute
+
+//chart frame dimensions
+var chartWidth = window.innerWidth * 0.5,
+    chartHeight = 750,
+    leftPadding = 25,
+    rightPadding = 2,
+    //could change this to move charts lower on the page
+    topBottomPadding = 5,
+    chartInnerWidth = chartWidth - leftPadding - rightPadding,
+    chartInnerHeight = chartHeight - topBottomPadding * 2,
+    translate = "translate(" + leftPadding + "," + topBottomPadding + ")";
+
+//create a scale to size bars proportionally to frame
+var yScale = d3.scaleLinear()
+        .range([chartHeight,0])
+        .domain([0, 105]);
 
 //execute script when window is loaded
 window.onload = setMap();
 
 function setMap(){
+
+
 	//set up choropleth map
     //map frame dimensions
     var width = window.innerWidth * 0.5,
@@ -28,8 +58,7 @@ function setMap(){
     var projection = d3.geoAlbers()
         .center([0, 3.9])
         .rotate([73, 0])
-        //maybe need to adust this
-        .parallels([20, 50])
+        .parallels([20, 20])
         .scale(2500)
         .translate([width / 2, height / 2]);
 
@@ -39,7 +68,7 @@ function setMap(){
     //use Promise.all to parallelize asynchronous data loading
     var promises = [];
     //bar chart format is not working with my data so I am putting in dummy data need to adjust data to percentage of dept area
-    promises.push(d3.csv("data/COL_adm1_AptitudPalma_dummy.csv")); //load attributes from csv
+    promises.push(d3.csv("data/COL_adm1_AptitudPalma.csv")); //load attributes from csv
     //TO DO: change to 50m map, for better match
     promises.push(d3.json("data/ne_50m_land.json")); //load background spatial data
     promises.push(d3.json("data/COL_adm1_geojson.json")); //load choropleth spatial data
@@ -73,6 +102,8 @@ function setMap(){
            //add enumeration units to the map
            setEnumerationUnits(colRegions, map, path, colorScale);
            setChart(csvData, colorScale);
+           //Am I calling the right items here??
+           createDropdown(csvData);
     };
 }; //end of setMap()
 
@@ -80,16 +111,7 @@ function setMap(){
 //Create bar chart container
 //function to create coordinated bar chart
 function setChart(csvData, colorScale){
-    //chart frame dimensions
-    var chartWidth = window.innerWidth * 0.425,
-        chartHeight = 750,
-        leftPadding = 25,
-        rightPadding = 2,
-        topBottomPadding = 5,
-        chartInnerWidth = chartWidth - leftPadding - rightPadding,
-        chartInnerHeight = chartHeight - topBottomPadding * 2,
-        translate = "translate(" + leftPadding + "," + topBottomPadding + ")";
-
+  
 
     //create a second svg element to hold the bar chart
     var chart = d3.select("body")
@@ -105,11 +127,6 @@ function setChart(csvData, colorScale){
         .attr("height", chartInnerHeight)
         .attr("transform", translate);
 
-    //create a scale to size bars proportionally to frame
-    var yScale = d3.scaleLinear()
-        .range([0, chartHeight])
-        .domain([0, 105]);
-
     //annotate bars with attribute value text
     var numbers = chart.selectAll(".numbers")
         .data(csvData)
@@ -119,15 +136,21 @@ function setChart(csvData, colorScale){
             return a[expressed]-b[expressed]
         })
         .attr("class", function(d){
-            return "numbers " + d.adm1_code;
+            return "numbers " + d.ID_1;
         })
         .attr("text-anchor", "middle")
+        .attr("stroke","black")
         .attr("x", function(d, i){
             var fraction = chartWidth / csvData.length;
             return i * fraction + (fraction - 1) / 2;
         })
         .attr("y", function(d){
-            return chartHeight - yScale(parseFloat(d[expressed])) + 15;
+// var yScale = d3.scaleLinear()
+//         .range([chartHeight],0)
+//         .domain([0, 105]);
+         //console.log(chartHeight);
+            return chartHeight - yScale(parseFloat(d[expressed])) +15;
+        //return (chartHeight -  parseFloat(d[expressed]) )-40;
         })
         .text(function(d){
             return d[expressed];
@@ -138,9 +161,10 @@ function setChart(csvData, colorScale){
         .attr("x", 40)
         .attr("y", 40)
         .attr("class", "chartTitle")
-        .text("Number of Variable " + expressed[3] + " in each region");
+        //.text("Number of Variable " + expressed[3] + " in each region");
 
     //create vertical axis generator
+
     var yAxis = d3.axisLeft()
         .scale(yScale);
 
@@ -157,34 +181,108 @@ function setChart(csvData, colorScale){
         .attr("height", chartInnerHeight)
         .attr("transform", translate);
 
-  //set bars for each province
-    var bars = chart.selectAll(".bars")
+  //set bars for each department
+    var bars = chart.selectAll(".bar")
         .data(csvData)
         .enter()
         .append("rect")
         .sort(function(a, b){
-            return a[expressed]-b[expressed]
+           return a[expressed]-b[expressed]
         })
         .attr("class", function(d){
-            return "bars " + d.adm1_code;
+           return "bars " + d.adm1_code;
         })
-        .attr("width", chartWidth / csvData.length - 1)
-        .attr("x", function(d, i){
-            return i * (chartWidth / csvData.length);
+        .attr("width", chartInnerWidth / csvData.length - 1);
+
+        //set bar positions, heights, and colors
+        updateChart(bars, csvData.length, colorScale);
+
+    };//end of SetChart()
+
+
+
+
+//Drop-down menu
+//This is too high, it is not on top of the map
+//function to create a dropdown menu for attribute selection
+
+function createDropdown(csvData){
+    //add select element
+    var dropdown = d3.select("#drop")
+        .append("select")
+        .attr("class", "dropdown")
+        .on("change", function(){
+            changeAttribute(this.value, csvData)
+        });
+
+    //add initial option
+    var titleOption = dropdown.append("option")
+        .attr("class", "titleOption")
+        .attr("disabled", "true")
+        .text("Select Attribute");
+
+    //add attribute name options
+    var attrOptions = dropdown.selectAll("attrOptions")
+        .data(attrArray)
+        .enter()
+        .append("option")
+        .attr("value", function(d){ return d })
+        .text(function(d){ return d });
+};
+
+//dropdown change listener handler
+function changeAttribute(attribute, csvData){
+    //change the expressed attribute
+    expressed = attribute;
+
+    //recreate the color scale
+    var colorScale = makeColorScale(csvData);
+
+    //recolor enumeration units
+    var regions = d3.selectAll(".regions")
+        .transition()
+        .duration(1000)
+        .style("fill", function(d){
+            return choropleth(d.properties, colorScale)
+        });
+
+        //re-sort, resize, and recolor bars
+        //
+    var bars = d3.selectAll(".bar")
+        //re-sort bars
+        .sort(function(a, b){
+            return b[expressed] - a[expressed];
         })
-        .attr("height", function(d){
-            return yScale(parseFloat(d[expressed]));
+        .transition() //add animation
+        .delay(function(d, i){
+            return i * 20
         })
-        .attr("y", function(d){
-            return chartHeight - yScale(parseFloat(d[expressed]));
+        .duration(500);
+
+        //is this in the correct spot?
+        updateChart(bars, csvData.length, colorScale);
+    }; //end of changeAttribtue()
+
+//function to position, size, and color bars in chart
+function updateChart(bars, n, colorScale){
+    //position bars
+    bars.attr("x", function(d, i){
+            return i * (chartInnerWidth / n) + leftPadding;
         })
-         //apply color scale to bars
+        //size/resize bars
+        .attr("height", function(d, i){
+            return 750 - yScale(parseFloat(d[expressed]));
+        })
+        .attr("y", function(d, i){
+            return yScale(parseFloat(d[expressed])) + topBottomPadding;
+        })
+        //color/recolor bars
         .style("fill", function(d){
             return choropleth(d, colorScale);
         });
+        var chartTitle = d3.select(".chartTitle")
+            .text("Percent of land area with  " + expressed[3] + " in each department");
 };
-
-
 
 //Graticules
 function setGraticule(map, path){
@@ -209,8 +307,8 @@ function setGraticule(map, path){
 
 //Data join
 function joinData(colRegions, csvData){
-	//variables for data join
-    var attrArray = ["NO_APTA", "APTITUD_BAJO", "APTITUD_MEDIA", "APTITUD_ALTA", "EXCLUSION_LEGAL"];
+	//variables for data  - moved this up to global
+    //var attrArray = ["Moderately Suitable for Oil Palm", "Highly Suitable for Oil Palm", "in Protected Area", "Cattle Population","Former FARC Territory", "Former ELN Territory"];
 
     //loop through csv to assign each set of csv attribute values to geojson region
     for (var i=0; i<csvData.length; i++){
@@ -294,6 +392,83 @@ function setEnumerationUnits(colRegions, map, path, colorScale){
             .style("fill", function(d){
                 return choropleth(d.properties, colorScale);
         });
+};
+
+//function to highlight enumeration units and bars
+function highlight(props){
+    //change stroke
+    var selected = d3.selectAll("." + props.adm1_code)
+        .style("stroke", "blue")
+        .style("stroke-width", "2");
+
+    setLabel(props);
+};
+
+//function to create dynamic label
+function setLabel(props){
+    //label content
+    var labelAttribute = "<h1>" + props[expressed] +
+        "</h1><b>" + expressed + "</b>";
+
+    //create info label div
+    var infolabel = d3.select("body")
+        .append("div")
+        .attr("class", "infolabel")
+        .attr("id", props.ID_1 + "_label")
+        .html(labelAttribute);
+
+    var regionName = infolabel.append("div")
+        .attr("class", "labelname")
+        .html(props.name);
+};
+
+//function to reset the element style on mouseout
+function dehighlight(props){
+    var selected = d3.selectAll("." + props.adm1_code)
+        .style("stroke", function(){
+            return getStyle(this, "stroke")
+        })
+        .style("stroke-width", function(){
+            return getStyle(this, "stroke-width")
+        });
+
+    function getStyle(element, styleName){
+        var styleText = d3.select(element)
+            .select("desc")
+            .text();
+
+        var styleObject = JSON.parse(styleText);
+
+        return styleObject[styleName];
+    };
+
+    //remove info label
+    d3.select(".infolabel")
+        .remove();
+};
+
+//function to move info label with mouse
+function moveLabel(){
+    //get width of label
+    var labelWidth = d3.select(".infolabel")
+        .node()
+        .getBoundingClientRect()
+        .width;
+
+    //use coordinates of mousemove event to set label coordinates
+    var x1 = d3.event.clientX + 10,
+        y1 = d3.event.clientY - 75,
+        x2 = d3.event.clientX - labelWidth - 10,
+        y2 = d3.event.clientY + 25;
+
+    //horizontal label coordinate, testing for overflow
+    var x = d3.event.clientX > window.innerWidth - labelWidth - 20 ? x2 : x1; 
+    //vertical label coordinate, testing for overflow
+    var y = d3.event.clientY < 75 ? y2 : y1; 
+
+    d3.select(".infolabel")
+        .style("left", x + "px")
+        .style("top", y + "px");
 };
 
 })(); //last line of main.js

@@ -8,19 +8,19 @@
 }
 
 .axis text {
-    font-family: sans-serif;
+    font-family: Avenir, sans-serif;
     font-size: .9em;
     fill: #999;
 }
 
 .title {
-    font-family: sans-serif;
+    font-family: Avenir, sans-serif;
     font-size: 1.5em;
     font-weight: bold;
 }
 
 .labels {
-    font-family: sans-serif;
+    font-family: Avenir, sans-serif;
     font-size: 1em;
 }
 
@@ -47,7 +47,7 @@
 
 .numbers {
     fill: white;
-    font-family: sans-serif;
+    font-family: Avenir, sans-serif;
 }
 
 .chartBackground {
@@ -67,8 +67,26 @@
 }
 
 .chartTitle {
-    font-family: sans-serif;
+    font-family: Avenir, sans-serif;
     font-size: 1.5em;
     font-weight: bold;
+}
+
+
+.dropdown {
+    position: absolute;
+    top: 30px;
+    left: 40px;
+    z-index: 10;
+    font-family: Avenir, sans-serif;
+    font-size: 1em;
+    font-weight: bold;
+    padding: 2px;
+    border: 1px solid #999;
+    box-shadow: 2px 2px 4px #999;
+}
+
+option {
+    font-weight: normal;
 }
 
