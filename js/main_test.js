@@ -200,7 +200,7 @@ function setChart(csvData, colorScale){
         //.attr("y", 0);
 
         //set bar positions, heights, and colors
-        updateChart(bars, csvData.length, colorScale);
+        updateChart(bars, csvData.length, colorScale,expressed);
 
     };//end of SetChart()
 
@@ -237,6 +237,7 @@ function createDropdown(csvData){
 
 //dropdown change listener handler
 function changeAttribute(attribute, csvData){
+
     //change the expressed attribute
     expressed = attribute;
 
@@ -252,11 +253,23 @@ function changeAttribute(attribute, csvData){
         });
 
     //re-sort, resize, and recolor bars
-    var bars = d3.selectAll(".bar")
+    var bars = d3.selectAll(".bars")
         //re-sort bars
         .sort(function(a, b){
             return b[expressed] - a[expressed];
         });
+       console.dir(bars.keys);
+        //  var bars = chart.selectAll(".bar")
+        // .data(csvData)
+        // .enter()
+        // .append("rect")
+        // .sort(function(a, b){
+        //   return b[expressed]-a[expressed]
+        // })
+        // .attr("class", function(d){
+        //    return "bars " + d.ID_1;
+        // })
+        // .attr("width", chartWidth / csvData.length - 1);
         //.attr("x", function(d, i){
         //    return i * (chartInnerWidth / csvData.length) + leftPadding;
         //})
@@ -273,12 +286,13 @@ function changeAttribute(attribute, csvData){
         //});
 
         //is this in the correct spot?
-        updateChart(bars, csvData.length, colorScale);
+     updateChart(bars, csvData.length, colorScale, attribute);
     }; //end of changeAttribtue()
 
 //function to position, size, and color bars in chart
-function updateChart(bars, n, colorScale){
+function updateChart(bars, n, colorScale, expressed){
     //position bars
+
     bars.attr("x", function(d, i){
             return i * (chartInnerWidth / n) + leftPadding;
         })
@@ -295,6 +309,7 @@ function updateChart(bars, n, colorScale){
         });
         var chartTitle = d3.select(".chartTitle")
             .text("Percent of land area with  " + expressed[3] + " in each department");
+
 };
 
 //Graticules
