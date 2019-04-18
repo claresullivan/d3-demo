@@ -1,11 +1,8 @@
 //Clare Sullivan
 //D3 Lab 2
 //Bugs to fix
-//1. bar chart is not interctive
-//2. title on bar chart says a letter not a variable name
 //3. Other design items? 
     //5.a.Add images
-//5. Transitions
 //6. x labels are slightly too long....
 
 
@@ -169,14 +166,14 @@ function setChart(csvData, colorScale){
         .attr("transform", translate)
         .call(yAxis);
 
-    //create frame for chart border
+    //create a frame for chart border
     var chartFrame = chart.append("rect")
         .attr("class", "chartFrame")
         .attr("width", chartInnerWidth)
         .attr("height", chartInnerHeight)
         .attr("transform", translate);
 
-  //set bars for each department
+  //create a bar for each department
     var bars = chart.selectAll(".bar")
         .data(csvData)
         .enter()
@@ -187,7 +184,8 @@ function setChart(csvData, colorScale){
         .attr("class", function(d){
            return "bars " + d.ID_1;
         })
-        .attr("width", chartWidth / csvData.length - 1);
+        .attr("width", chartWidth / csvData.length - 1)
+        .on("mouseover", highlight);
         //.attr("x", function(d,i){
         //    return i * (chartWidth/csvData.length);
         //})
@@ -224,7 +222,7 @@ function createDropdown(csvData){
     var titleOption = dropdown.append("option")
         .attr("class", "titleOption")
         .attr("disabled", "true")
-        .text("Select Attribute");
+        .text("Select Land Attributes");
 
     //add attribute name options
     var attrOptions = dropdown.selectAll("attrOptions")
@@ -257,8 +255,13 @@ function changeAttribute(attribute, csvData){
         //re-sort bars
         .sort(function(a, b){
             return b[expressed] - a[expressed];
-        });
-       console.dir(bars.keys);
+        })
+          .transition() //add animation
+        .delay(function(d, i){
+            return i * 20
+        })
+        .duration(500);
+       //console.dir(bars.keys);
         //  var bars = chart.selectAll(".bar")
         // .data(csvData)
         // .enter()
@@ -301,14 +304,15 @@ function updateChart(bars, n, colorScale, expressed){
             return 750 - yScale(parseFloat(d[expressed]));
         })
         .attr("y", function(d, i){
-            return yScale(parseFloat(d[expressed])) + topBottomPadding;
+            return yScale(parseFloat(d[expressed])) + topBottomPadding - 10;
         })
         //color/recolor bars
         .style("fill", function(d){
             return choropleth(d, colorScale);
         });
+        //Correct the chartTitle to stop printing single letters - look at array notatin
         var chartTitle = d3.select(".chartTitle")
-            .text("Percent of land area with  " + expressed[3] + " in each department");
+            .text("Percent of Area " + expressed + " in Each Department");
 
 };
 
@@ -395,7 +399,7 @@ function makeColorScale(data){
     console.log(colorScale.quantiles()) 
 };
 
-//function to test for data value and return color
+//tests for data value and return color
 function choropleth(props, colorScale){
     //make sure attribute value is a number
     var val = parseFloat(props[expressed]);
@@ -407,6 +411,7 @@ function choropleth(props, colorScale){
     };
 };
 
+//Add Colombian departments to the map
 function setEnumerationUnits(colRegions, map, path, colorScale){
      //add Colombia municipalities to map
         var regions = map.selectAll(".regions")
@@ -419,16 +424,19 @@ function setEnumerationUnits(colRegions, map, path, colorScale){
             .attr("d", path)
             .style("fill", function(d){
                 return choropleth(d.properties, colorScale);
+            })
+            .on("mouseover", function(d){
+                highlight(d.properties);
         });
 };
 
-//function to highlight enumeration units and bars
+//function to highlight enumeration units and the bar chart
 function highlight(props){
     //change stroke
-    var selected = d3.selectAll("." + props.adm1_code)
-        .style("stroke", "blue")
+    console.dir(props);
+    var selected = d3.selectAll("." + String(props.ID_1))
+        .style("stroke", "#969696")  
         .style("stroke-width", "2");
-
     setLabel(props);
 };
 
@@ -437,12 +445,11 @@ function setLabel(props){
     //label content
     var labelAttribute = "<h1>" + props[expressed] +
         "</h1><b>" + expressed + "</b>";
-
-    //create info label div
+        //create info label div
     var infolabel = d3.select("body")
         .append("div")
         .attr("class", "infolabel")
-        .attr("id", props.Name + "_label")
+        .attr("id", props.ID_1 + "_label")
         .html(labelAttribute);
 
     var regionName = infolabel.append("div")
@@ -450,53 +457,5 @@ function setLabel(props){
         .html(props.Name);
 };
 
-//function to reset the element style on mouseout
-function dehighlight(props){
-    var selected = d3.selectAll("." + props.adm1_code)
-        .style("stroke", function(){
-            return getStyle(this, "stroke")
-        })
-        .style("stroke-width", function(){
-            return getStyle(this, "stroke-width")
-        });
-
-    function getStyle(element, styleName){
-        var styleText = d3.select(element)
-            .select("desc")
-            .text();
-
-        var styleObject = JSON.parse(styleText);
-
-        return styleObject[styleName];
-    };
-
-    //remove info label
-    d3.select(".infolabel")
-        .remove();
-};
-
-//function to move info label with mouse
-function moveLabel(){
-    //get width of label
-    var labelWidth = d3.select(".infolabel")
-        .node()
-        .getBoundingClientRect()
-        .width;
-
-    //use coordinates of mousemove event to set label coordinates
-    var x1 = d3.event.clientX + 10,
-        y1 = d3.event.clientY - 75,
-        x2 = d3.event.clientX - labelWidth - 10,
-        y2 = d3.event.clientY + 25;
-
-    //horizontal label coordinate, testing for overflow
-    var x = d3.event.clientX > window.innerWidth - labelWidth - 20 ? x2 : x1; 
-    //vertical label coordinate, testing for overflow
-    var y = d3.event.clientY < 75 ? y2 : y1; 
-
-    d3.select(".infolabel")
-        .style("left", x + "px")
-        .style("top", y + "px");
-};
 
 })(); //last line of main.js

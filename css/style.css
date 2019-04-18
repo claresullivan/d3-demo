@@ -1,4 +1,7 @@
 /* Stylesheet by Clare Sullivan, 2019 */
+div.titlediv1 {
+  text-align: center;
+}
 .axis path,
 .axis line {
     fill: none;
@@ -37,7 +40,7 @@
 }
 
 .gratBackground {
-    fill: #D5E3FF;
+    fill:#67a9cf;
 }
 
 .map {
