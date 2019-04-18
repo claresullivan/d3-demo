@@ -66,7 +66,7 @@ function setMap(){
     promises.push(d3.csv("data/COL_adm1_AptitudPalma.csv")); //load attributes from csv
     //TO DO: change to 50m map, for better match
     promises.push(d3.json("data/ne_50m_land.json")); //load background spatial data
-    promises.push(d3.json("data/COL_adm1_geojson.json")); //load choropleth spatial data
+    promises.push(d3.json("data/COL_adm1_topojson_0417.json")); //load choropleth spatial data
     Promise.all(promises).then(callback);
 
    function callback(data, csvData, landSurrounding, colRegions){
@@ -80,7 +80,7 @@ function setMap(){
 
           //translate land to TopoJSON
           var landSurrounding = topojson.feature(land, land.objects.ne_50m_land)
-          var colRegions = topojson.feature(colombia, colombia.objects.COL_adm1_geojson).features; 	
+          var colRegions = topojson.feature(colombia, colombia.objects.COL_adm1_topojson_0417).features; 	
 		
 			//add surrounding land to map
           var land = map.append("path")
