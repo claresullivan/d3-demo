@@ -185,7 +185,11 @@ function setChart(csvData, colorScale){
            return "bars " + d.ID_1;
         })
         .attr("width", chartWidth / csvData.length - 1)
-        .on("mouseover", highlight);
+        .on("mouseover", highlight)
+        .on("mouseout", dehighlight)
+        .on("mousemove", moveLabel);
+     var desc = bars.append("desc")
+        .text('{"stroke": "none", "stroke-width": "0px"}');
         //.attr("x", function(d,i){
         //    return i * (chartWidth/csvData.length);
         //})
@@ -427,7 +431,15 @@ function setEnumerationUnits(colRegions, map, path, colorScale){
             })
             .on("mouseover", function(d){
                 highlight(d.properties);
-        });
+            })
+            .on("mouseout", function(d){
+            dehighlight(d.properties);
+            })
+            .on("mousemove", moveLabel);
+
+
+        var desc = regions.append("desc")
+            .text('{"stroke": "#000", "stroke-width": "0.5px"}');
 };
 
 //function to highlight enumeration units and the bar chart
@@ -457,5 +469,35 @@ function setLabel(props){
         .html(props.Name);
 };
 
+//function to reset the element style on mouseout
+function dehighlight(props){
+    var selected = d3.selectAll("." + props.ID_1)
+        .style("stroke", function(){
+            return getStyle(this, "stroke")
+        })
+        .style("stroke-width", function(){
+            return getStyle(this, "stroke-width")
+        });
+
+    function getStyle(element, styleName){
+        var styleText = d3.select(element)
+            .select("desc")
+            .text();
+
+        var styleObject = JSON.parse(styleText);
+
+        return styleObject[styleName];
+    };
+};
+
+function moveLabel(){
+    //use coordinates of mousemove event to set label coordinates
+    var x = d3.event.clientX + 10,
+        y = d3.event.clientY - 75;
+
+    d3.select(".infolabel")
+        .style("left", x + "px")
+        .style("top", y + "px");
+};
 
 })(); //last line of main.js

@@ -40,11 +40,11 @@ div.titlediv1 {
 }
 
 .gratBackground {
-    fill:#67a9cf;
+    fill:#9ecae1;
 }
 
 .map {
-    border: medium solid #999;
+    border: medium solid black;
     margin: 10px 0 0 20px;
 }
 
@@ -64,8 +64,8 @@ div.titlediv1 {
 
 .chartFrame {
     fill: none;
-    stroke: #999;
-    stroke-width: 3px;
+    stroke: black;
+    stroke-width: 4px;
     shape-rendering: crispEdges;
 }
 
@@ -92,4 +92,21 @@ div.titlediv1 {
 option {
     font-weight: normal;
 }
+.infolabel {
+    position: absolute;
+    height: 50px;
+    min-width: 100px;
+    font-family: Avenir, sans-serif;
+    color: #fff;
+    background-color: #000;
+    border: solid thin #fff;
+    padding: 5px 10px;
+}
 
+.infolabel h1 {
+    margin: 0 20px 0 0;
+    font-family: Avenir, sans-serif;
+    padding: 0;
+    display: inline-block;
+    line-height: 1em;
+}
