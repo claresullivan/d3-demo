@@ -1,10 +1,11 @@
 //Clare Sullivan
 //D3 Lab 2
 //Bugs to fix
-//3. Other design items? 
-    //5.a.Add images
-//6. x labels are slightly too long....
-
+//1. chart dehighlight might still not work
+//2. Is it possible to wrap the title in the bar chart
+//3. Label that is not dynamic changes attribute and name, and piles up
+//4. Moving label does not have a dynamic attribute 
+//6. Correct Labels are piling up at the bottom
 
 
 
@@ -121,6 +122,22 @@ function setChart(csvData, colorScale){
         .attr("height", chartInnerHeight)
         .attr("transform", translate);
 
+    //create a bar for each department
+    var bars = chart.selectAll(".bar")
+        .data(csvData)
+        .enter()
+        .append("rect")
+        .sort(function(a, b){
+          return b[expressed]-a[expressed]
+        })
+        .attr("class", function(d){
+           return "bars " + d.ID_1;
+        })
+        .attr("width", chartWidth / csvData.length - 1)
+        .on("mouseover", highlight)
+        .on("mouseout", dehighlight)
+        .on("mousemove", moveLabel);
+
     //annotate bars with attribute value text
     var numbers = chart.selectAll(".numbers")
         .data(csvData)
@@ -142,7 +159,7 @@ function setChart(csvData, colorScale){
 //         .range([chartHeight],0)
 //         .domain([0, 105]);
          //console.log(chartHeight);
-            return chartHeight - yScale(100-parseFloat(d[expressed]))+ 15;
+            //return chartHeight - yScale(100-parseFloat(d[expressed]))+ 15;
         //return (chartHeight -  parseFloat(d[expressed]) )-40;
         })
         .text(function(d){
@@ -153,7 +170,9 @@ function setChart(csvData, colorScale){
     var chartTitle = chart.append("text")
         .attr("x", 40)
         .attr("y", 40)
-        .attr("class", "chartTitle");
+        .attr("class", "chartTitle")
+        .selectAll("text")
+        //.call(wrap, x.rangeBand());
         //.text("Number of Variable " + expressed[3] + " in each region");
 
     //create vertical axis generator
@@ -173,21 +192,8 @@ function setChart(csvData, colorScale){
         .attr("height", chartInnerHeight)
         .attr("transform", translate);
 
-  //create a bar for each department
-    var bars = chart.selectAll(".bar")
-        .data(csvData)
-        .enter()
-        .append("rect")
-        .sort(function(a, b){
-          return b[expressed]-a[expressed]
-        })
-        .attr("class", function(d){
-           return "bars " + d.ID_1;
-        })
-        .attr("width", chartWidth / csvData.length - 1)
-        .on("mouseover", highlight)
-        .on("mouseout", dehighlight)
-        .on("mousemove", moveLabel);
+  
+
      var desc = bars.append("desc")
         .text('{"stroke": "none", "stroke-width": "0px"}');
         //.attr("x", function(d,i){
@@ -308,7 +314,7 @@ function updateChart(bars, n, colorScale, expressed){
             return 750 - yScale(parseFloat(d[expressed]));
         })
         .attr("y", function(d, i){
-            return yScale(parseFloat(d[expressed])) + topBottomPadding - 10;
+            return yScale(parseFloat(d[expressed])) + topBottomPadding - 12;
         })
         //color/recolor bars
         .style("fill", function(d){
@@ -378,11 +384,16 @@ function joinData(colRegions, csvData){
 //function to create color scale generator
 function makeColorScale(data){
     var colorClasses = [
-        "#ffffcc",
-        "#c2e699",
-        "#78c679",
-        "#31a354",
-        "#006837",
+       "#ffffd4",
+        "#fed98e",
+        "#fe9929",
+        "#d95f0e",
+        "#993404",
+        //"#ffffcc",
+        //"#c2e699",
+        //"#78c679",
+        //"#31a354",
+        //"#006837",
     ];
 
     //create color scale generator (choosing quantile for now, natural breaks may be a better choice)
@@ -437,7 +448,6 @@ function setEnumerationUnits(colRegions, map, path, colorScale){
             })
             .on("mousemove", moveLabel);
 
-
         var desc = regions.append("desc")
             .text('{"stroke": "#000", "stroke-width": "0.5px"}');
 };
@@ -445,10 +455,9 @@ function setEnumerationUnits(colRegions, map, path, colorScale){
 //function to highlight enumeration units and the bar chart
 function highlight(props){
     //change stroke
-    console.dir(props);
-    var selected = d3.selectAll("." + String(props.ID_1))
-        .style("stroke", "#969696")  
-        .style("stroke-width", "2");
+    var selected = d3.selectAll("." + props.ID_1)
+        .style("stroke", "#ffffd4")  
+        .style("stroke-width", "3");
     setLabel(props);
 };
 
@@ -457,6 +466,7 @@ function setLabel(props){
     //label content
     var labelAttribute = "<h1>" + props[expressed] +
         "</h1><b>" + expressed + "</b>";
+        
         //create info label div
     var infolabel = d3.select("body")
         .append("div")
@@ -466,7 +476,7 @@ function setLabel(props){
 
     var regionName = infolabel.append("div")
         .attr("class", "labelname")
-        .html(props.Name);
+        .html(props.NAME_1);
 };
 
 //function to reset the element style on mouseout
@@ -488,6 +498,10 @@ function dehighlight(props){
 
         return styleObject[styleName];
     };
+
+    //remove the info label
+     d3.select(".infolabel")
+        .remove();
 };
 
 function moveLabel(){

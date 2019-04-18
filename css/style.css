@@ -2,18 +2,20 @@
 div.titlediv1 {
   text-align: center;
 }
+
 .axis path,
 .axis line {
     fill: none;
-    stroke: #999;
+    stroke: black;
     stroke-width: 1px;
     shape-rendering: crispEdges;
 }
 
 .axis text {
     font-family: Avenir, sans-serif;
-    font-size: .9em;
-    fill: #999;
+    font-size: 1em;
+    fill: black;
+    font-weight: bold;
 }
 
 .title {
@@ -73,6 +75,7 @@ div.titlediv1 {
     font-family: Avenir, sans-serif;
     font-size: 1.5em;
     font-weight: bold;
+    word-wrap: normal;
 }
 
 
@@ -94,7 +97,7 @@ option {
 }
 .infolabel {
     position: absolute;
-    height: 50px;
+    height: 65px;
     min-width: 100px;
     font-family: Avenir, sans-serif;
     color: #fff;
@@ -103,10 +106,15 @@ option {
     padding: 5px 10px;
 }
 
+.regionName {
+    font-family: Avenir, sans-serif;
+    font-weight: bold;
+}
 .infolabel h1 {
     margin: 0 20px 0 0;
     font-family: Avenir, sans-serif;
-    padding: 0;
+    font-weight: bold;
+    padding: 7px;
     display: inline-block;
     line-height: 1em;
 }
